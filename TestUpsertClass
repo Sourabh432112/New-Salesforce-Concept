@@ -1,0 +1,16 @@
+public class TestUpsertClass {
+    public static void testmethod1(){
+        List<Account> listacc = new List<Account>();
+        Account acc = new Account();
+        acc.FirstName='testAccount';
+        acc.LastName='testAccount';
+        acc.EMPI__c='432432432';
+        acc.Source_System__c='Cerner';
+        acc.EMPI__pc = '432432432';
+        listacc.add(acc);
+        Account acc2 =[select Id,PersonMobilePhone from Account where Id='001ct00000G4vw9AAB'];
+        acc2.PersonMobilePhone ='43243242332';
+        listacc.add(acc2);
+        upsert listacc;
+    }
+}
