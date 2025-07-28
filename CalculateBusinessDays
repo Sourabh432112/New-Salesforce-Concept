@@ -1,0 +1,18 @@
+public class BusinessDaysCalculator {
+    public static Integer calculateDays(Date startDate,Date endDate){
+        List<Date> listOfHolidays = new List<Date>{
+            Date.newInstance(2025,4,5),
+                Date.newInstance(2025,8,8)};
+                    Integer BusinessDays =0;
+        for(Date d1 = startDate;d1<= endDate;d1.addDays(1)){
+            Date weekStartDate = startDate.toStartofWeek();
+            Integer daysDifference = weekStartDate.daysBetween(startDate);
+            Boolean isWeekend = (daysDifference ==1)|| (daysDifference ==7);
+            Boolean isHoliday = (listOfHolidays.contains(startDate));
+            if(!isHoliday && !isWeekend){
+                BusinessDays++;
+            }
+        }
+        return BusinessDays;
+    }
+}
