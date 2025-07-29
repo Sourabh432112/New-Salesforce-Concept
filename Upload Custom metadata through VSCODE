@@ -1,0 +1,5 @@
+firstly create the csv file where column name of file match with field name and then use this command -
+
+sfdx force:cmdt:record:insert --filepath data/EmilyCMDTImport.csv  --typename myCustomMetadataType__mdt
+
+then upload the metadata
