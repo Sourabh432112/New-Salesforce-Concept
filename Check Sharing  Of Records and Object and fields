@@ -1,0 +1,14 @@
+// this class is run in with sharing
+public with sharing sharingRuleClass{
+  //  to check object and  field level access to logged in user 
+//
+   if(Schema.SobjectType.Case.fields.Email.isCreateable()){
+     system.debug('create permission');
+} 
+if(Schema.SobjectType.Case.fields.Email.isUpdateable()){
+   system.debug('update permission');
+}
+if(Schema.SObjectType.Case.isDeletable()){
+   system.debug('delete permission');
+}
+}
