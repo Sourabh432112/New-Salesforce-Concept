@@ -1,0 +1,64 @@
+public class AccountIterable implements Iterable<List<SObject>> {
+    public String contentId;
+    
+    public AccountIterable(String contentId){
+        this.contentId = contentId;
+    }
+    
+    public Iterator<List<SObject>> iterator(){
+        return new accountIterator(contentId);
+    }
+    
+    public class accountIterator implements Iterator<List<SObject>>{
+        Map<String,Object> mapOfHeaderWithAccount = new Map<String,Object>();
+        List<String> headers = new List<String>();
+        List<String> listOfLines = new  List<String>();
+        Account acc = new Account();
+        Integer index =1;
+        Integer batchSize =200;
+        
+        public accountIterator(String contentId){
+          List<Contentversion> contentVer1 = [Select ID,versionData,ContentDocument.Title,
+                                                  ContentDocumentId from Contentversion 
+                                                  where ContentDocumentId =: contentId];
+            Blob blobData = contentVer1[0].versionData;
+            String fileData = blobData.toString();
+            listOfLines = fileData.split('\n');
+            if(listOfLines[0].contains('\t')) 
+                headers = listOfLines[0].split('\t');
+            else if (listOfLines[0].contains(','))
+                headers = listOfLines[0].split(',');
+            system.debug('headers---'+headers);
+            system.debug('listOfLines---'+listOfLines);
+        }
+        
+        public Boolean hasNext(){
+            return index <listOfLines.size();
+        }
+        
+        public List<SObject> next(){
+            List<SObject> listOfRecords = new List<SObject>();
+            Map<String,Object> mapOfheaderWithData = new Map<String,Object>();
+            Integer endIndex = Math.min(index+batchSize,listOfLines.size());
+            List<String> columns = new List<String>();
+            for(Integer i=index;i<endIndex;i++){
+                if(listOfLines[index].contains('/t'))
+					 columns = listOfLines[index].split('/t');
+				else if(listOfLines[index].contains(','))
+                   columns = listOfLines[index].split(',');
+                for(Integer j=0;j<columns.size();j++){
+                     mapOfheaderWithData.put(headers[j],columns[j]);
+                }
+            }
+            if(mapOfheaderWithData.size()>0){
+                Account acc = new Account();
+                acc.Name = (String)mapOfheaderWithData.get('Name');
+                acc.Phone = (String)mapOfheaderWithData.get('Phone');
+                acc.PersonEmail = (String)mapOfheaderWithData.get('Email');
+                listOfRecords.add(acc);
+            }
+            system.debug('listOfRecords---'+listOfRecords);
+           return listOfRecords;
+        }
+    }
+}
