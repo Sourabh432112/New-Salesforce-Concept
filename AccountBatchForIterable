@@ -1,0 +1,19 @@
+public class AccountRecodCreationBatch implements Database.Batchable<SObject> {
+    public String contentDocId;
+    public AccountRecodCreationBatch(String docId){
+        this.contentDocId = docId;
+    }
+    public Iterable<SObject> start(Database.BatchableContext bc){
+        List<SObject> allRecs = new List<SObject>();
+        for (List<SObject> chunk : new AccountIterable(contentDocId)) {
+            allRecs.addAll(chunk);
+        }
+        return allRecs;
+    }
+    public void execute(Database.BatchableContext bc,List<SObject> scope){
+        
+    }
+    public void finish(Database.BatchableContext bc){
+        
+    }
+}
