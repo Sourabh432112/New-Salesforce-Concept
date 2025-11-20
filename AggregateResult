@@ -1,0 +1,32 @@
+trigger  Tasktrigger on Task(after insert,after update){
+   TaskHandler.onAfterUpdate(trigger.new);
+}
+
+
+public class TaskHandler{
+  public statis void onAfterUpdate(List<Task> tasklist){
+     for(Task taskRec :tasklist){
+        if(String.isNotBlank(taskRec.projectId__c){
+        
+       setOfParentId.add(taskRec.projectId__c);
+}
+}
+
+List<AggregateResult> Results = [select projectId__c parentId,SUM(CASE when status ='In-progress' THEN 1 WHEN status='not-completed') tasklist from Case where projectId__c IN :setOfParentId group by projectId__c];
+for(AggregateResult args: Results){
+     String parentId = args.get('parentId');
+     Integer count = args.get('tasklist');
+   MapOfParentIdwithCOunt.put(parentId,count);
+}
+for(String  parentId :setOfParentId){
+if( MapOfParentIdwithCOunt.contains(parentId)!=null){
+  string Id = 
+  Project__c proj = new Project__c();
+ proj.Id = Id;
+ if(MapOfParentIdwithCOunt.get(parentId)>0){
+  proj.stauts ='in-complete';
+ }else{
+ proj.stauts ='complete';
+}
+}
+    
