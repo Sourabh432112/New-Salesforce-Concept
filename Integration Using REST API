@@ -1,0 +1,65 @@
+trigger ProductTrigger on Product__c (after insert, after update) {
+    ProductTriggerHandler.onAfterInsert(trigger.new)
+}
+
+public class ProductTriggerHandler{
+    public static void onAfterInsert(List<Product__c> newList){
+        Set<String> listOfProductId = new Set<String>();
+        for(Product__c prod :newList){
+            listOfProductId.add(prod.Id);
+        }
+        if(listOfProductId.size()>0){
+            // call queueable class
+            System.enqueuJob(new SyncProductToIMSQueueable(listOfProductId));
+        }
+    }
+}
+
+
+
+public class SyncProductToIMSQueueable implements Queueable,Database.AllowsCallouts{
+    public Set<String> setOfIds = new Set<String>();
+    public SyncProductToIMSQueueable(Set<String> listOfProductId){
+        this.setOfIds = listOfProductId;
+    }
+    public void execute(QueueableContext context){
+        try{
+            List<Product__c> productList = [select Product_Id__c,Name,qty__c,status__c from Product__c where Id IN :setOfIds];
+            List<customRequestWrap> listOfRequestWrapper = new List<customRequestWrap>();
+            for(Product__c prod :productList){
+                customRequestWrap wrap = new customRequestWrap();
+                wrap.productId = prod.Product_Id__c;
+                wrap.name = prod.Name;
+                wrap.qty = prod.qty__c;
+                wrap.status = prod.status__c;
+                listOfRequestWrapper.add(wrap);
+            }
+            String jsonBody = JSON.serialize(listOfRequestWrapper);
+            HTTP http = new HTTP();
+            HTTPRequest request = new HTTPRequest();
+            request.setEndpoint('callout:NamedCredentialName/api/inventory/update');
+            request.setMethod("POST");
+            request.setBody(jsonBody);
+            HTTPResponse response = http.send(request);
+            
+        }catch(Exception e){
+            Integration_Log__c log = new Integration_Log__c();
+            log.Name = 'first';
+            log.Request__c = request.getBody();
+            log.Response__c = e.getMessage();
+            log.Status__c = 'failed';
+            insert log;
+        }
+
+    }
+    public class customRequestWrap{
+        public String productId;
+        public String name;
+        public Integer qty;
+        public String status;
+    }
+}
+
+
+
+
