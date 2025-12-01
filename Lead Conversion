@@ -1,0 +1,22 @@
+Lead leadToConvert = [
+    SELECT Id, LastName, Company 
+    FROM Lead 
+    WHERE Email = 'test@example.com' LIMIT 1
+];
+
+Database.LeadConvert lc = new Database.LeadConvert();
+lc.setLeadId(leadToConvert.Id);
+
+// Create new Account & Contact
+lc.setDoNotCreateOpportunity(false);
+lc.setOpportunityName('New Opportunity from Lead');
+
+// Execute conversion
+Database.LeadConvertResult result = Database.convertLead(lc);
+
+if (result.isSuccess()) {
+    System.debug('Lead converted successfully!');
+    System.debug('New Account Id: ' + result.getAccountId());
+    System.debug('New Contact Id: ' + result.getContactId());
+    System.debug('New Opportunity Id: ' + result.getOpportunityId());
+}
