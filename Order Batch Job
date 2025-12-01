@@ -1,0 +1,55 @@
+Public class OrderBatch implements Database.batchable<SObject>{
+
+    public Database.queryLocator start(Database.BatchableContext bc){
+        Date nextDays = Date.today().addDays(7);
+        Database.getQueryLocator([select Id from Order__c where status ='Pending Fulfillment' AND Expected_Delivery_Date__c <= :nextDays]);
+    }
+    public void execute(Database.BatchableContext bc,List<Order__c> scope){
+        for(Order__c orderRec :scope){
+            setOfOrderId.add(orderRec.Id);
+        }
+        List<AggregateResult> listOfRec = [select OrderId__c,SUM(Quantity__c) totalQuantity,COUNT DISTINCT(Product__c) FROM Order_Line__c group by OrderId__c];
+        List<String> listOfOrderId = new List<String>();
+        for(AggregateResult args :listOfRec){
+            String OrderId = args.get('OrderId__c');
+            Integer count = args.get('totalQuantity');
+            if(count > 500){
+                listOfOrderId.add(OrderId);
+            }
+            Order__c orderRec = new Order__c();
+            orderRec.Status ='Ready For Dispatch';
+            orderRec.Total_Quantity__c = count;
+            updateOrder.add(orderRec);
+        }
+
+        if(updateOrder.size() >0){
+            update updateOrder;
+        }
+        if(listOfOrderId.size()>0){
+            System.enqueueJob(new OrderCalloutQueueable(listOfOrderId));
+        }
+    }
+}
+
+
+public class OrderCalloutQueueable implements Queueuable,Database.AllowCallouts{
+    public List<String> listOfOrderId;
+    public OrderCalloutQueueable(List<String> listOfOrderId){
+        this.listOfOrderId = listOfOrderId;
+    }
+
+    public void execute(QueueableContext q){
+        try{
+            String jsonString = JSON.seralized(listOfOrderId);
+            HTTP http = new HTTP();
+            HTTPRequest request = new HTTPRequest();
+            request.setMethod('POST');
+            request.setEndpoint('callout:Namedcredential');
+            request.setBody(jsonString);
+            HTTPResponse response = http.send(request);
+
+        }catch(Exception e){
+
+        }
+    }
+}
