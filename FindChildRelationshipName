@@ -1,0 +1,9 @@
+Map<String, Schema.SObjectType> allObjects = Schema.getGlobalDescribe();
+Schema.SObjectType accType = allObjects.get('Account');
+Schema.DescribeSObjectResult accDescribe = accType.getDescribe();
+
+List<Schema.ChildRelationship> childRels = accDescribe.getChildRelationships();
+
+for (Schema.ChildRelationship rel : childRels) {
+    System.debug('Child Object: ' + rel.getRelationshipName());
+}
