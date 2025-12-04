@@ -1,0 +1,30 @@
+// Example of abstract class
+
+
+public abstract class parent{
+    // normal method
+    public void normalMethod(){
+        system.debug('gdsg');
+    }
+
+    public abstract void abstractMethod();
+
+    public virtual void fool(){
+        system.debug('virtual');
+    }
+}
+
+
+public class child extends parent{
+    public override void abstractMethod(){
+        system.debug('testmethie');
+    }
+    public override void fool(){
+        system.debug('override method');
+    }
+}
+
+
+// abstract class contains normal method , virtual method and abstract method but does not contains static variable or static method
+// we can't create the instance of abstract class
+// 
