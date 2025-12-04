@@ -1,0 +1,40 @@
+example of Inheritance
+
+
+// parent class
+public class animal{
+    public void eat(){
+        system.debug('eat');
+    }
+    public virtual void walk(){
+        system.debug('walk');
+    }
+}
+
+// child class
+
+public class dog extends animal{
+    public void bark(){
+        system.debug('barking');
+    }
+
+    // below code is not allowed as parent class is not virtal class and method
+    public override void eat(){
+        system.debug('cook');
+    }
+
+    // override the virtual method
+    public override void walk(){
+        system.debug('test');
+    }
+}
+
+
+// 1. dog class can inherit the property of animal class but can't override the eat class
+// 2. normal class does not contain  abstract method but it contains virtual method
+dog d1 = new dog();
+d1.eat();
+d1.bark();
+d1.walk();
+Animal mal = new Animal();
+mal.walk();
