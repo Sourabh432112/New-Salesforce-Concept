@@ -1,0 +1,65 @@
+// this code is used to subscribe platform event and refresh the componenet with updated data
+// this event is fired by casetrigger with priority as updated
+
+import { LightningElement,wire,api } from 'lwc';
+import getCaseRecord from '@salesforce/apex/CaseService.getCaseRecord';
+import { subscribe, unsubscribe } from 'lightning/empApi';
+import { refreshApex } from '@salesforce/apex';
+
+export default class CaseRealTimeUI extends LightningElement {
+    wiredCase;
+    @api recordId;
+    channelName = '/event/Case_Update__e';
+    subscription = null;
+    caseData;
+
+
+    @wire(getCaseRecord, { caseId: '$recordId' })
+        wiredCase(result) {
+            this.wiredCase = result;  // VERY IMPORTANT
+            const { data, error } = result;
+            if(data){
+                console.log('data---',data);
+                this.caseData = data;
+                console.log('wiredCase---',this.wiredCase);
+            }
+            if(error){
+                console.log('error---',error);
+            }
+        }  
+
+    connectedCallback(){
+        console.log('connectedCallback---');
+        this.subScribeEvent();
+    }
+    
+    subScribeEvent() {
+        subscribe(this.channelName, -1, (eventReceived) => {
+            const caseIdFromEvent = eventReceived.data.payload.CaseId__c;
+
+            if (caseIdFromEvent === this.recordId) {
+                console.log('Refreshing case...');
+                refreshApex(this.wiredCase); // 🔥 Correct refresh
+            }
+        })
+        .then(response => {
+            this.subscription = response;
+            console.log('Subscribed:', JSON.stringify(response));
+        })
+        .catch(error => {
+            console.error('Subscription error:', error);
+        });
+    }
+
+}
+
+<template>
+     <lightning-card title="Case Details (Live)">
+        <template if:true={caseData}>
+            <p>Case Number: {caseData.CaseNumber}</p>
+            <p>Status: {caseData.Status}</p>
+            <p>Priority: {caseData.Priority}</p>
+            <p>Subject: {caseData.Subject}</p>
+        </template>
+    </lightning-card>
+</template>
