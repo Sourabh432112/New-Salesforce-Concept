@@ -1,0 +1,62 @@
+import { LightningElement,wire } from 'lwc';
+import getAccountRecord from '@salesforce/apex/AccountController.getAccountRecord'
+import updateRecord from '@salesforce/apex/AccountController.updateRecord';
+
+const columns = [
+    { label: 'Website', fieldName: 'Website', editable: true },
+    { label: 'Phone', fieldName: 'Phone', editable: true },
+];
+export default class InlineDatatableEdit extends LightningElement {
+    columns = columns;
+    data;
+    validRecords=[];
+
+
+    @wire(getAccountRecord)
+    wiredData({data,error}){
+        if(data){
+            console.log('data---',data);
+            this.data = data;
+            console.log('this.data---',this.data);
+        }
+        if(error){
+            console.log('error---',error);
+        }
+    }
+    handleSave(event){
+        try{
+            const saveDraftValues = event.detail.draftValues;
+            console.log('saveDraftValues----',saveDraftValues);
+            saveDraftValues.forEach(currentItem => {
+                
+                if(currentItem.Website.includes('@gmail.com')){
+                    this.validRecords.push(currentItem);
+                }
+            });
+
+            if(this.validRecords.length>0){
+                updateRecord({'listOfAccount':this.validRecords}).then(result=>{
+                    console.log('result---');
+                    refreshApex(this.wiredData);
+                }).catch(error=>{
+                    console.log('error---',error);
+                })
+            }
+        }catch(e){
+            console.log('e---',e);
+        }
+    }
+}
+
+<template>
+    <div style="height: 300px;">
+        <lightning-datatable
+                key-field="Id"
+                data={data}
+                columns={columns}
+                draft-values={draftValues}
+                onsave={handleSave}
+                errors={tableErrors}>
+        </lightning-datatable>
+    </div>
+</template>
