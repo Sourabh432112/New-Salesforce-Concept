@@ -1,0 +1,71 @@
+// Parent componenet 
+<template>
+        <lightning-combobox
+            name="Account Recordtype"
+            label="Account Recordtype"
+            value={value}
+            placeholder="Select Recordtype"
+            options={options}
+            onchange={handleChange} ></lightning-combobox>
+        <div if:true={selectedRecordtype}>
+            <c-child-component recordtype={selectedRecordtype}></c-child-component>
+        </div>
+</template>
+
+
+import { LightningElement } from 'lwc';
+export default class ParentComponent extends LightningElement {
+    selectedRecordtype;
+    get options() {
+        return [
+            { label: 'Consumer Account', value: 'Consumer Account' },
+            { label: 'Business Account', value: 'Business Account' },
+        ];
+    }
+
+    handleChange(event) {
+        this.selectedRecordtype = event.detail.value;
+    }
+}
+
+// child component
+
+<template>
+    <div if:true={recordtype}>
+        <div style="height: 300px;">
+            <lightning-datatable
+                    key-field="Id"
+                    data={AccountData}
+                    columns={columns}
+                    draft-values={draftValues}
+                    onsave={handleSave}
+                    errors={tableErrors}>
+            </lightning-datatable>
+        </div>
+    </div>
+</template>
+
+import { LightningElement,api,wire } from 'lwc';
+import getAccountBasedOnRecordtype from '@salesforce/apex/AccountDataCtrl.getAccountBasedOnRecordtype';
+const columns = [
+    { label: 'Website', fieldName: 'Website', editable: true },
+    { label: 'Phone', fieldName: 'Phone', editable: true },
+];
+export default class ChildComponent extends LightningElement {
+    @api recordtype;
+    AccountData;
+    columns = columns;
+
+    
+   @wire(getAccountBasedOnRecordtype, { recordtype: '$recordtype' })
+    wiredAccounts({ data, error }) {
+        if (data) {
+            console.log('Accounts:', data);
+            this.AccountData = data;
+        }
+        if (error) {
+            console.error(error);
+        }
+    }
+
+}
