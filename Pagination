@@ -1,0 +1,119 @@
+<template>
+    <div style="height: 300px;">
+        <lightning-datatable
+                key-field="Id"
+                data={data}
+                columns={columns}
+                hide-checkbox-column ="true"
+                >
+        </lightning-datatable>
+    </div>
+    <div class="slds-col">
+        <div class="slds-col slds-size_6-of-12 slds-p-right_small">
+            <lightning-button brand="success" label="Previous" onclick={handlePrevious} disabled={disablePrevious}></lightning-button>
+        </div>
+        <div class="slds-col slds-size_6-of-12 slds-p-left_small">
+            <lightning-button brand="success" label="Next" onclick={handleNext} disabled ={disableNext}></lightning-button>
+        </div>
+    </div>
+</template>
+
+
+import { LightningElement, track } from 'lwc';
+import getAccountRecord from '@salesforce/apex/AccountController.getAccountRecord';
+import getAccCount from '@salesforce/apex/AccountController.getAccCount';
+import updateRecord from '@salesforce/apex/AccountController.updateRecord';
+
+const PAGE_SIZE = 20;
+
+const columns = [
+    { label: 'Name', fieldName: 'Name', editable: false },
+    { label: 'Phone', fieldName: 'Phone', editable: false }
+];
+
+export default class InlineDatatableEdit extends LightningElement {
+
+    // UI
+    columns = columns;
+    @track data = [];
+
+    // Pagination State
+    offset = 0;
+    totalCount = 0;
+
+    // Record Handling
+    validRecords = [];
+
+    connectedCallback() {
+        this.initialize();
+    }
+
+    async initialize() {
+        await Promise.all([this.loadCount(), this.loadData()]);
+    }
+
+    // Load Account Count
+    async loadCount() {
+        try {
+            this.totalCount = await getAccCount();
+        } catch (error) {
+            console.error('Error fetching count', error);
+        }
+    }
+
+    // Load Data with current offset
+    async loadData() {
+        try {
+            this.data = await getAccountRecord({
+                offset1: this.offset,
+                limitAcc: PAGE_SIZE
+            });
+        } catch (error) {
+            console.error('Error fetching records', error);
+        }
+    }
+
+    // Pagination Handlers
+    handlePrevious() {
+        if (this.offset >= PAGE_SIZE) {
+            this.offset -= PAGE_SIZE;
+            this.loadData();
+        }
+    }
+
+    handleNext() {
+        if (!this.disableNext) {
+            this.offset += PAGE_SIZE;
+            this.loadData();
+        }
+    }
+
+    // Button State Handlers
+    get disablePrevious() {
+        return this.offset === 0;
+    }
+
+    get disableNext() {
+        return (this.offset + PAGE_SIZE) >= this.totalCount;
+    }
+}
+
+
+public class AccountController {
+    @AuraEnabled
+    public static List<Account> getAccountRecord(Integer offset1,Integer limitAcc){
+        List<Account> accList = [select Name,phone from Account limit :limitAcc OFFSET :offset1];
+        return accList;
+    }
+    @AuraEnabled
+    public static Integer getAccCount(list<Account> listOfAccount){
+       return [select count() from Account];
+
+    }
+    
+    @AuraEnabled
+    public static void updateRecord(list<Account> listOfAccount){
+        system.debug('listOfAccount--'+listOfAccount);
+        update listOfAccount;
+    }
+}
