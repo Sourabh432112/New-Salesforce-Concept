@@ -1,5 +1,23 @@
+// publish plarform event using trigger
+trigger CaseTrigger on Case (after update) {
+    List<Case_Update__e> listOfEvents = new List<Case_Update__e>();
+    for(Case caseRec :trigger.new){
+        Case oldCase = trigger.oldMap.get(caseRec.Id);
+        if(caseRec.Priority != oldCase.Priority){
+            Case_Update__e event = new Case_Update__e();
+            event.CaseId__c = caseRec.Id;
+            event.ChangeType__c = 'Priority Change';
+            event.Message__c  = 'prioriy is chagd';
+            listOfEvents.add(event);
+        }
+    }
+    if(!listOfEvents.isEmpty()){
+        EventBus.publish(listOfEvents);
+    }
+}
+
+
 // this code is used to subscribe platform event and refresh the componenet with updated data
-// this event is fired by casetrigger with priority as updated
 
 import { LightningElement,wire,api } from 'lwc';
 import getCaseRecord from '@salesforce/apex/CaseService.getCaseRecord';
