@@ -29,6 +29,18 @@ public class TriggerDispatcher {
         }
         return trigger.old[0].getSObjectType().getDescribe().getName();
     }
+
+// below method is used to store already executed records and avoid recursion
+   public static Boolean canBeExecute(Id recordId){
+        if(alreadyExecutedIds.contains(recordId)){
+            return true;
+        }
+        return false;
+        }
+    
+    public static void addOpportunityId(Set<String> setOfRecordIds){
+        alreadyExecutedIds.addAll(setOfRecordIds);
+    }
 }
 
 // base class which contains method of trigger event and context variable
@@ -66,7 +78,14 @@ public abstract class TriggerHandlerBase{
 }
 
 public class OpportunityHandler extends TriggerHandlerBase {
-    public override void beforeInsert(){
+    public override void beforeUpdate(){
+        Set<String> parentIds = new Set<String>();
         List<Opportunity> listOfOpportunity = (List<Opportunity>)newList;
+        for(Opportunity opp:listOfOpportunity){
+            if(!OpportunityDispatcher.canBeExecute(opp.ParentId)){
+                parentIds.add(opp.ParentId);
+            }
+            OpportunityDispatcher.addOpportunityId(parentIds);
+        }
     }
 }
