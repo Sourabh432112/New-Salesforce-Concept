@@ -1,0 +1,72 @@
+trigger OpportunityTrigger on Opportunity (before insert,before update,before delete,after insert,after update,after delete,after undelete) {
+	TriggerDispatcher.run();       
+}
+
+public class TriggerDispatcher {
+    public static void run(){
+        //get objectname dynamically
+        
+        String objectName = getObjectName(); // get the object name where event occur
+        TriggerHandlerBase handler =  instanceOfClass(objectName); // creating the instance of triggerhanderbase
+        system.debug('handler----'+handler);
+        if (Trigger.isBefore) {
+            if (Trigger.isInsert)
+                handler.beforeInsert(); // calling the method of triggerHandlerbase and child class who extend this class can override the method
+    	}
+    }
+    
+    public static TriggerHandlerBase instanceOfClass(String objectName){
+        String className = objectName+'Handler';
+        Type t1 = Type.forName(className); // this will check class is exist with this classNamae and return the type of class
+        system.debug('t1---'+t1);
+        return (TriggerHandlerBase) t1.newInstance(); // create the instance of class return like new Opportunityhandler
+
+    }
+    public static String getObjectName(){
+        if(trigger.new[0] !=null){
+          //  return trigger.new[0].getSObjectType().getDescribe().getName();
+          return trigger.new[0].getSObjectType().getDescribe().getName();
+        }
+        return trigger.old[0].getSObjectType().getDescribe().getName();
+    }
+}
+
+// base class which contains method of trigger event and context variable
+public abstract class TriggerHandlerBase{
+
+    public List<SObject> newList{
+        get {
+            return Trigger.new;
+        }
+    }
+    
+    public List<SObject> oldList {
+        get {
+            return trigger.old;
+        }
+    }
+    public Map<Id,SObject> oldMap {
+        get{
+            return trigger.oldMap;
+        }
+    }
+    public Map<Id,SObject> newMap {
+        get {
+            return trigger.newMap;
+        }
+    }
+
+    public virtual void beforeInsert(){}
+    public virtual void beforeUpdate(){}
+    public virtual void beforeDelete(){}
+    public virtual void afterInsert(){}
+    public virtual void afterUpdate(){}
+    public virtual void afterDelete(){}
+    public virtual void afterUndelete(){}
+}
+
+public class OpportunityHandler extends TriggerHandlerBase {
+    public override void beforeInsert(){
+        List<Opportunity> listOfOpportunity = (List<Opportunity>)newList;
+    }
+}
