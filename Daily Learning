@@ -1,3 +1,14 @@
 Date - 10 feb
 
 If the record is sent for approval using approval process then it is locked and user can't make any change to that record until it approved,rejected or recall
+
+Date - 11 feb
+scnerio  - suppose there is 2 user, one of them is able to read and edit record and another one is only able to read it
+So firstly check object level security - If object level security (if both has same profile)
+then go for record level security - if OWD is private, 
+then go for role level heiracy but if both have same role or same on heirachy and 
+then check sharing rule and if there is not sharing rule and 
+then check manual sharing and record is not manual shared 
+then apex based sharing and if not 
+then check if user 1 is part of account teams and user 2 is not, if not 
+then check territory management if user 1 is assigned to territory where account is part of that territory
