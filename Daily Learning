@@ -21,3 +21,13 @@ If you try to create opportunitylineitem record by adding new product and if pro
 we can call autolunched flow from record trigger flow
 
 If you need to implement before and after trigger using flow on Account or any other object then you need to create 2 flows to perform before executeion and after execution
+
+
+
+when you perform integration with external system using REST API then 
+for synchronus - heap limit (6MB) and CPU limit()
+for asynchrounus - healp limit (12 MB)
+
+if the limit exceed the transaction is not going to happen. So to resolve this we can use following feature
+1. use Bulk API 
+2. Use Mulesofoft as middleware to make chuck of data and then send data to salesforce using REST API
