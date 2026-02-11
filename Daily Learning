@@ -31,3 +31,13 @@ for asynchrounus - healp limit (12 MB)
 if the limit exceed the transaction is not going to happen. So to resolve this we can use following feature
 1. use Bulk API 
 2. Use Mulesofoft as middleware to make chuck of data and then send data to salesforce using REST API
+
+there is 4 types of flows 
+1. Screen flow
+2. Record trigger flow
+3. Autolunched flow
+4. scheduled flow
+
+we can use autolunched flow inside record trigger flow
+
+if you need to perform any bulk operation like send email or update record then scheduled flow has limitation of 250k records in 24 hours , more than that you need to go for async apex
