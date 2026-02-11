@@ -12,3 +12,12 @@ then check manual sharing and record is not manual shared
 then apex based sharing and if not 
 then check if user 1 is part of account teams and user 2 is not, if not 
 then check territory management if user 1 is assigned to territory where account is part of that territory
+
+
+If you need to use pricebook then firstly you need to activate it
+If you try to create opportunitylineitem record by adding new product and if product is not visible there then you need to check if product is added to opportunity 
+
+
+we can call autolunched flow from record trigger flow
+
+If you need to implement before and after trigger using flow on Account or any other object then you need to create 2 flows to perform before executeion and after execution
