@@ -41,3 +41,15 @@ there is 4 types of flows
 we can use autolunched flow inside record trigger flow
 
 if you need to perform any bulk operation like send email or update record then scheduled flow has limitation of 250k records in 24 hours , more than that you need to go for async apex
+
+Date -12 Feb
+
+If we need to send data millions of data from salesforce to externdal system then
+we can use bulk API where external system make inbound integration with salesforce
+here are the steps you can use
+1. Create the job
+ POST -  {{_endpoint}}/services/data/v{{version}}/jobs/query
+2. track the job status 
+GET - {{_endpoint}}/services/data/v{{version}}/jobs/query/{{_jobId}}
+3. check the result
+GET - {{_endpoint}}/services/data/v{{version}}/jobs/query/{{_jobId}}/results
