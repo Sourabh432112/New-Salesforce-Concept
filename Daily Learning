@@ -53,3 +53,18 @@ here are the steps you can use
 GET - {{_endpoint}}/services/data/v{{version}}/jobs/query/{{_jobId}}
 3. check the result
 GET - {{_endpoint}}/services/data/v{{version}}/jobs/query/{{_jobId}}/results
+
+
+Date -13 FEB
+
+If we need to send large data in real time integration then we can go for platform event or CDC
+
+salesforce to ServiceNow  (Push Mechanism) -
+ 1. platform event published by Apex, trigger or flow (EventBus.publish(listOfEvent))
+ 2. then integration system can capture event using pub-sub API based on GRPC stream
+3. servicenow can download .proto file from salesforce and make inbound call using oauth2.0 and subscribe to event and can store data inside other system
+
+platform event event is captured on eventbBus for 24 hours after that the event is lost So we need to Bulk API to get the data
+if external system is not available for 8 hours then based on replayId it can cature the lost event
+
+ 
